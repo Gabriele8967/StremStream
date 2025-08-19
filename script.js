@@ -207,9 +207,17 @@ class StreamingApp {
         return card;
     }
 
-    playMovie(movie) {
+    async playMovie(movie) {
         const title = movie.title || 'Film';
         const tmdbId = movie.id;
+        
+        // Verifica disponibilità prima di aprire il player
+        const isAvailable = await this.checkContentAvailability(tmdbId, 'movie');
+        
+        if (!isAvailable) {
+            this.showUnavailableMessage(title, 'film');
+            return;
+        }
         
         document.getElementById('playerTitle').textContent = title;
         document.getElementById('tvControls').classList.add('hidden');
@@ -223,6 +231,14 @@ class StreamingApp {
     async playTVShow(show) {
         const title = show.name || 'Serie TV';
         const tmdbId = show.id;
+        
+        // Verifica disponibilità prima di aprire il player
+        const isAvailable = await this.checkContentAvailability(tmdbId, 'tv', 1, 1);
+        
+        if (!isAvailable) {
+            this.showUnavailableMessage(title, 'serie TV');
+            return;
+        }
         
         this.currentShow = {
             ...show,
@@ -419,6 +435,65 @@ class StreamingApp {
             seasonSelect.value = currentSeason + 1;
             this.updateEpisodes();
         }
+    }
+
+    async checkContentAvailability(tmdbId, type, season = null, episode = null) {
+        try {
+            let url;
+            if (type === 'movie') {
+                url = `https://vixsrc.to/movie/${tmdbId}`;
+            } else {
+                url = `https://vixsrc.to/tv/${tmdbId}/${season}/${episode}`;
+            }
+
+            const response = await fetch(url, { method: 'HEAD' });
+            
+            // Se ritorna 404 o altri errori, il contenuto non è disponibile
+            if (response.status === 404 || response.status >= 400) {
+                return false;
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Errore nel controllo disponibilità:', error);
+            return false;
+        }
+    }
+
+    showUnavailableMessage(title, type) {
+        // Crea modal di errore personalizzato
+        const modal = document.createElement('div');
+        modal.className = 'unavailable-modal';
+        modal.innerHTML = `
+            <div class="unavailable-content">
+                <div class="unavailable-icon">😔</div>
+                <h3>Contenuto non disponibile</h3>
+                <p><strong>${title}</strong> non è attualmente disponibile nella libreria di streaming.</p>
+                <p>Questo ${type} potrebbe essere aggiunto in futuro.</p>
+                <button class="close-unavailable">Chiudi</button>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Gestisci chiusura
+        const closeBtn = modal.querySelector('.close-unavailable');
+        closeBtn.addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                document.body.removeChild(modal);
+            }
+        });
+        
+        // Auto chiusura dopo 5 secondi
+        setTimeout(() => {
+            if (document.body.contains(modal)) {
+                document.body.removeChild(modal);
+            }
+        }, 5000);
     }
 }
 
