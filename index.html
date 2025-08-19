@@ -13,9 +13,37 @@
             <nav>
                 <button class="nav-btn active" data-section="movies">Film</button>
                 <button class="nav-btn" data-section="tv">Serie TV</button>
+                <button class="nav-btn" data-section="watchlist">❤️ Preferiti</button>
+                <button class="nav-btn" data-section="history">📜 Cronologia</button>
             </nav>
         </div>
     </header>
+
+    <!-- Avviso AdBlock -->
+    <div class="adblock-notice">
+        <div class="container">
+            <div class="notice-content">
+                <span class="notice-icon">🛡️</span>
+                <span class="notice-text">
+                    <strong>Consiglio:</strong> Si raccomanda l'uso di un AdBlock per una migliore esperienza di navigazione
+                </span>
+                <button class="close-notice" onclick="this.parentElement.parentElement.style.display='none'">&times;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Avviso Disponibilità -->
+    <div class="availability-notice">
+        <div class="container">
+            <div class="notice-content">
+                <span class="notice-icon">ℹ️</span>
+                <span class="notice-text">
+                    <strong>Nota:</strong> Non tutti i contenuti TMDB potrebbero essere disponibili su VixSrc. Se un contenuto non si carica, prova con un altro titolo.
+                </span>
+                <button class="close-notice" onclick="this.parentElement.parentElement.style.display='none'">&times;</button>
+            </div>
+        </div>
+    </div>
 
     <main class="container">
         <!-- Search Section -->
@@ -61,6 +89,29 @@
                         <select id="episodeSelect"></select>
                     </div>
                 </div>
+                <!-- Player Actions -->
+                <div class="player-actions">
+                    <button id="addToWatchlistBtn" class="action-btn">❤️ Aggiungi ai Preferiti</button>
+                    <button id="addBookmarkBtn" class="action-btn">🔖 Bookmark</button>
+                    <button id="addNoteBtn" class="action-btn">📝 Aggiungi Nota</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Note Modal -->
+        <div id="noteModal" class="modal">
+            <div class="modal-content note-modal-content">
+                <div class="modal-header">
+                    <h3>Aggiungi Nota</h3>
+                    <button class="close-btn" id="closeNoteModal">&times;</button>
+                </div>
+                <div class="note-form">
+                    <textarea id="noteTextarea" placeholder="Scrivi la tua nota qui..."></textarea>
+                    <div class="note-actions">
+                        <button id="saveNoteBtn" class="save-note-btn">💾 Salva Nota</button>
+                        <button id="cancelNoteBtn" class="cancel-note-btn">❌ Annulla</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -68,6 +119,27 @@
         <section id="searchResults" class="content-section">
             <h2>Risultati Ricerca</h2>
             <div class="grid" id="searchGrid"></div>
+        </section>
+
+        <!-- Watchlist Section -->
+        <section id="watchlist" class="content-section">
+            <h2>I Tuoi Preferiti</h2>
+            <div class="empty-message" id="watchlistEmpty">
+                <p>Nessun contenuto nei preferiti. Clicca sul ❤️ per aggiungere film o serie TV!</p>
+            </div>
+            <div class="grid" id="watchlistGrid"></div>
+        </section>
+
+        <!-- History Section -->
+        <section id="history" class="content-section">
+            <h2>Cronologia Visualizzazione</h2>
+            <div class="history-controls">
+                <button class="clear-history-btn">🗑️ Pulisci Cronologia</button>
+            </div>
+            <div class="empty-message" id="historyEmpty">
+                <p>Nessuna visualizzazione nella cronologia.</p>
+            </div>
+            <div class="history-list" id="historyList"></div>
         </section>
     </main>
 

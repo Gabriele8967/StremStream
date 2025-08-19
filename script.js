@@ -2,8 +2,16 @@ class StreamingApp {
     constructor() {
         this.currentSection = 'movies';
         this.currentShow = null;
+        this.currentContent = null;
         this.tmdbApiKey = '0b5bf58e72d2b79c29927e215709d248';
         this.tmdbToken = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwYjViZjU4ZTcyZDJiNzljMjk5MjdlMjE1NzA5ZDI0OCIsIm5iZiI6MTc1MjA1MTQ4OC4xMDksInN1YiI6IjY4NmUyZjIwMzJmZTZjNGU3ZmU4MDFmYyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.o-x1adUNh43o4V-y5l9KaOe38T_Hbt4MkzhCfXLcCbI';
+        
+        // Initialize storage systems
+        this.watchlist = this.loadFromStorage('watchlist') || [];
+        this.history = this.loadFromStorage('history') || [];
+        this.bookmarks = this.loadFromStorage('bookmarks') || [];
+        this.notes = this.loadFromStorage('notes') || {};
+        
         this.init();
     }
 
@@ -56,6 +64,37 @@ class StreamingApp {
                 this.handlePlayerEvent(event.data);
             }
         });
+
+        // Player action buttons
+        document.getElementById('addToWatchlistBtn').addEventListener('click', () => {
+            this.addToWatchlist();
+        });
+
+        document.getElementById('addBookmarkBtn').addEventListener('click', () => {
+            this.addBookmark();
+        });
+
+        document.getElementById('addNoteBtn').addEventListener('click', () => {
+            this.openNoteModal();
+        });
+
+        // Note modal controls
+        document.getElementById('closeNoteModal').addEventListener('click', () => {
+            this.closeNoteModal();
+        });
+
+        document.getElementById('saveNoteBtn').addEventListener('click', () => {
+            this.saveNote();
+        });
+
+        document.getElementById('cancelNoteBtn').addEventListener('click', () => {
+            this.closeNoteModal();
+        });
+
+        // History controls
+        document.querySelector('.clear-history-btn').addEventListener('click', () => {
+            this.clearHistory();
+        });
     }
 
     switchSection(section) {
@@ -75,7 +114,14 @@ class StreamingApp {
         document.getElementById('searchResults').classList.remove('active');
 
         this.currentSection = section;
-        this.loadContent(section);
+        
+        if (section === 'watchlist') {
+            this.renderWatchlist();
+        } else if (section === 'history') {
+            this.renderHistory();
+        } else {
+            this.loadContent(section);
+        }
     }
 
     async loadContent(type) {
@@ -211,16 +257,17 @@ class StreamingApp {
         const title = movie.title || 'Film';
         const tmdbId = movie.id;
         
-        // Verifica disponibilità prima di aprire il player
-        const isAvailable = await this.checkContentAvailability(tmdbId, 'movie');
-        
-        if (!isAvailable) {
-            this.showUnavailableMessage(title, 'film');
-            return;
-        }
-        
         document.getElementById('playerTitle').textContent = title;
         document.getElementById('tvControls').classList.add('hidden');
+        
+        // Save current content for actions
+        this.currentContent = movie;
+        
+        // Add to history
+        this.addToHistory(movie, 'movie');
+        
+        // Update watchlist button
+        this.updateWatchlistButton();
         
         const playerFrame = document.getElementById('playerFrame');
         playerFrame.src = `https://vixsrc.to/movie/${tmdbId}?lang=it&autoplay=true&primaryColor=4ecdc4&secondaryColor=ff6b6b`;
@@ -232,24 +279,22 @@ class StreamingApp {
         const title = show.name || 'Serie TV';
         const tmdbId = show.id;
         
-        // Verifica disponibilità prima di aprire il player
-        const isAvailable = await this.checkContentAvailability(tmdbId, 'tv', 1, 1);
-        
-        if (!isAvailable) {
-            this.showUnavailableMessage(title, 'serie TV');
-            return;
-        }
-        
         this.currentShow = {
             ...show,
             tmdbId: tmdbId
         };
+        
+        // Save current content for actions
+        this.currentContent = show;
         
         document.getElementById('playerTitle').textContent = title;
         
         // Mostra i controlli TV
         const tvControls = document.getElementById('tvControls');
         tvControls.classList.remove('hidden');
+        
+        // Update watchlist button
+        this.updateWatchlistButton();
         
         // Carica le stagioni reali da TMDB
         await this.loadSeasons(tmdbId);
@@ -371,6 +416,11 @@ class StreamingApp {
         
         const playerFrame = document.getElementById('playerFrame');
         playerFrame.src = `https://vixsrc.to/tv/${this.currentShow.tmdbId}/${season}/${episode}?lang=it&autoplay=true&primaryColor=4ecdc4&secondaryColor=ff6b6b`;
+        
+        // Add to history when episode changes
+        if (this.currentContent) {
+            this.addToHistory(this.currentContent, 'tv', season, episode);
+        }
     }
 
     showPlayer() {
@@ -437,69 +487,327 @@ class StreamingApp {
         }
     }
 
-    async checkContentAvailability(tmdbId, type, season = null, episode = null) {
-        try {
-            let url;
-            if (type === 'movie') {
-                url = `https://vixsrc.to/movie/${tmdbId}`;
-            } else {
-                url = `https://vixsrc.to/tv/${tmdbId}/${season}/${episode}`;
-            }
 
-            const response = await fetch(url, { method: 'HEAD' });
-            
-            // Se ritorna 404 o altri errori, il contenuto non è disponibile
-            if (response.status === 404 || response.status >= 400) {
-                return false;
-            }
-            
-            return true;
+    // Storage Management
+    loadFromStorage(key) {
+        try {
+            const data = localStorage.getItem(`streamingApp_${key}`);
+            return data ? JSON.parse(data) : null;
         } catch (error) {
-            console.error('Errore nel controllo disponibilità:', error);
-            return false;
+            console.error('Error loading from storage:', error);
+            return null;
         }
     }
 
-    showUnavailableMessage(title, type) {
-        // Crea modal di errore personalizzato
-        const modal = document.createElement('div');
-        modal.className = 'unavailable-modal';
-        modal.innerHTML = `
-            <div class="unavailable-content">
-                <div class="unavailable-icon">😔</div>
-                <h3>Contenuto non disponibile</h3>
-                <p><strong>${title}</strong> non è attualmente disponibile nella libreria di streaming.</p>
-                <p>Questo ${type} potrebbe essere aggiunto in futuro.</p>
-                <button class="close-unavailable">Chiudi</button>
+    saveToStorage(key, data) {
+        try {
+            localStorage.setItem(`streamingApp_${key}`, JSON.stringify(data));
+        } catch (error) {
+            console.error('Error saving to storage:', error);
+        }
+    }
+
+    // Watchlist Management
+    addToWatchlist() {
+        if (!this.currentContent) return;
+
+        const contentId = this.currentContent.id;
+        const isAlreadyInWatchlist = this.watchlist.some(item => item.id === contentId);
+
+        if (isAlreadyInWatchlist) {
+            this.showMessage('Già presente nei preferiti!', 'info');
+            return;
+        }
+
+        const watchlistItem = {
+            id: contentId,
+            title: this.currentContent.title || this.currentContent.name,
+            type: this.currentContent.first_air_date || this.currentContent.media_type === 'tv' ? 'tv' : 'movie',
+            poster_path: this.currentContent.poster_path,
+            added_date: new Date().toISOString(),
+            vote_average: this.currentContent.vote_average
+        };
+
+        this.watchlist.unshift(watchlistItem);
+        this.saveToStorage('watchlist', this.watchlist);
+        this.showMessage('Aggiunto ai preferiti!', 'success');
+
+        // Update button text
+        const btn = document.getElementById('addToWatchlistBtn');
+        btn.innerHTML = '✅ Nei Preferiti';
+        btn.disabled = true;
+    }
+
+    removeFromWatchlist(id) {
+        this.watchlist = this.watchlist.filter(item => item.id !== id);
+        this.saveToStorage('watchlist', this.watchlist);
+        this.renderWatchlist();
+        this.showMessage('Rimosso dai preferiti', 'info');
+    }
+
+    renderWatchlist() {
+        const grid = document.getElementById('watchlistGrid');
+        const emptyMessage = document.getElementById('watchlistEmpty');
+
+        if (this.watchlist.length === 0) {
+            grid.style.display = 'none';
+            emptyMessage.style.display = 'block';
+            return;
+        }
+
+        emptyMessage.style.display = 'none';
+        grid.style.display = 'grid';
+        grid.innerHTML = '';
+
+        this.watchlist.forEach(item => {
+            const card = this.createWatchlistCard(item);
+            grid.appendChild(card);
+        });
+    }
+
+    createWatchlistCard(item) {
+        const card = document.createElement('div');
+        card.className = 'card watchlist-card';
+        
+        const addedDate = new Date(item.added_date).toLocaleDateString('it-IT');
+        
+        card.innerHTML = `
+            <div class="card-image">
+                ${item.poster_path ? 
+                    `<img src="https://image.tmdb.org/t/p/w500${item.poster_path}" alt="${item.title}" loading="lazy">` : 
+                    '🎬'
+                }
+                <button class="remove-watchlist-btn" onclick="app.removeFromWatchlist(${item.id})">&times;</button>
+            </div>
+            <div class="card-content">
+                <h3 class="card-title">${item.title}</h3>
+                <p class="card-info">Tipo: ${item.type === 'tv' ? 'Serie TV' : 'Film'}</p>
+                <p class="card-info">Aggiunto: ${addedDate}</p>
+                ${item.vote_average > 0 ? `<span class="rating">⭐ ${item.vote_average.toFixed(1)}</span>` : ''}
+                ${this.notes[item.id] ? '<span class="has-note">📝 Nota presente</span>' : ''}
             </div>
         `;
-        
-        document.body.appendChild(modal);
-        
-        // Gestisci chiusura
-        const closeBtn = modal.querySelector('.close-unavailable');
-        closeBtn.addEventListener('click', () => {
-            document.body.removeChild(modal);
-        });
-        
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                document.body.removeChild(modal);
+
+        card.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('remove-watchlist-btn')) {
+                if (item.type === 'tv') {
+                    this.playTVShow(item);
+                } else {
+                    this.playMovie(item);
+                }
             }
         });
+
+        return card;
+    }
+
+    // History Management
+    addToHistory(content, type, season = null, episode = null) {
+        const historyItem = {
+            id: content.id,
+            title: content.title || content.name,
+            type: type,
+            season: season,
+            episode: episode,
+            watched_date: new Date().toISOString(),
+            poster_path: content.poster_path
+        };
+
+        // Remove if already exists
+        this.history = this.history.filter(item => 
+            !(item.id === content.id && item.season === season && item.episode === episode)
+        );
+
+        this.history.unshift(historyItem);
         
-        // Auto chiusura dopo 5 secondi
+        // Keep only last 100 items
+        if (this.history.length > 100) {
+            this.history = this.history.slice(0, 100);
+        }
+
+        this.saveToStorage('history', this.history);
+    }
+
+    clearHistory() {
+        if (confirm('Sei sicuro di voler cancellare tutta la cronologia?')) {
+            this.history = [];
+            this.saveToStorage('history', this.history);
+            this.renderHistory();
+            this.showMessage('Cronologia cancellata', 'info');
+        }
+    }
+
+    renderHistory() {
+        const list = document.getElementById('historyList');
+        const emptyMessage = document.getElementById('historyEmpty');
+
+        if (this.history.length === 0) {
+            list.style.display = 'none';
+            emptyMessage.style.display = 'block';
+            return;
+        }
+
+        emptyMessage.style.display = 'none';
+        list.style.display = 'block';
+        list.innerHTML = '';
+
+        this.history.forEach(item => {
+            const historyItem = this.createHistoryItem(item);
+            list.appendChild(historyItem);
+        });
+    }
+
+    createHistoryItem(item) {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        
+        const watchedDate = new Date(item.watched_date).toLocaleString('it-IT');
+        const displayTitle = item.type === 'tv' && item.season && item.episode ? 
+            `${item.title} - S${item.season}E${item.episode}` : item.title;
+        
+        div.innerHTML = `
+            <div class="history-poster">
+                ${item.poster_path ? 
+                    `<img src="https://image.tmdb.org/t/p/w92${item.poster_path}" alt="${item.title}">` : 
+                    '<div class="placeholder">🎬</div>'
+                }
+            </div>
+            <div class="history-info">
+                <h4>${displayTitle}</h4>
+                <p>Visto il: ${watchedDate}</p>
+                <span class="history-type">${item.type === 'tv' ? 'Serie TV' : 'Film'}</span>
+            </div>
+            <button class="replay-btn" onclick="app.replayFromHistory(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                ▶️ Rivedere
+            </button>
+        `;
+
+        return div;
+    }
+
+    replayFromHistory(item) {
+        if (item.type === 'tv') {
+            this.playTVShow(item, item.season, item.episode);
+        } else {
+            this.playMovie(item);
+        }
+    }
+
+    // Bookmark Management
+    addBookmark() {
+        if (!this.currentContent) return;
+
+        const playerFrame = document.getElementById('playerFrame');
+        const currentTime = 0; // In a real implementation, you'd get this from the player
+
+        const bookmark = {
+            id: Date.now(),
+            content_id: this.currentContent.id,
+            title: this.currentContent.title || this.currentContent.name,
+            type: this.currentShow ? 'tv' : 'movie',
+            season: this.currentShow ? document.getElementById('seasonSelect').value : null,
+            episode: this.currentShow ? document.getElementById('episodeSelect').value : null,
+            timestamp: currentTime,
+            created_date: new Date().toISOString(),
+            poster_path: this.currentContent.poster_path
+        };
+
+        this.bookmarks.unshift(bookmark);
+        this.saveToStorage('bookmarks', this.bookmarks);
+        this.showMessage('Bookmark aggiunto!', 'success');
+    }
+
+    // Notes Management
+    openNoteModal() {
+        if (!this.currentContent) return;
+
+        const modal = document.getElementById('noteModal');
+        const textarea = document.getElementById('noteTextarea');
+        
+        // Load existing note if available
+        const existingNote = this.notes[this.currentContent.id];
+        textarea.value = existingNote || '';
+        
+        modal.classList.add('active');
+        textarea.focus();
+    }
+
+    closeNoteModal() {
+        const modal = document.getElementById('noteModal');
+        modal.classList.remove('active');
+        document.getElementById('noteTextarea').value = '';
+    }
+
+    saveNote() {
+        if (!this.currentContent) return;
+
+        const noteText = document.getElementById('noteTextarea').value.trim();
+        
+        if (noteText) {
+            this.notes[this.currentContent.id] = {
+                text: noteText,
+                title: this.currentContent.title || this.currentContent.name,
+                created_date: new Date().toISOString()
+            };
+            this.showMessage('Nota salvata!', 'success');
+        } else {
+            delete this.notes[this.currentContent.id];
+            this.showMessage('Nota rimossa', 'info');
+        }
+
+        this.saveToStorage('notes', this.notes);
+        this.closeNoteModal();
+
+        // Update UI if in watchlist
+        if (this.currentSection === 'watchlist') {
+            this.renderWatchlist();
+        }
+    }
+
+    // Utility Functions
+    showMessage(text, type = 'info') {
+        const message = document.createElement('div');
+        message.className = `toast-message ${type}`;
+        message.textContent = text;
+        
+        document.body.appendChild(message);
+        
         setTimeout(() => {
-            if (document.body.contains(modal)) {
-                document.body.removeChild(modal);
-            }
-        }, 5000);
+            message.classList.add('show');
+        }, 100);
+        
+        setTimeout(() => {
+            message.classList.remove('show');
+            setTimeout(() => {
+                if (document.body.contains(message)) {
+                    document.body.removeChild(message);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    updateWatchlistButton() {
+        const btn = document.getElementById('addToWatchlistBtn');
+        if (!this.currentContent) return;
+
+        const isInWatchlist = this.watchlist.some(item => item.id === this.currentContent.id);
+        
+        if (isInWatchlist) {
+            btn.innerHTML = '✅ Nei Preferiti';
+            btn.disabled = true;
+        } else {
+            btn.innerHTML = '❤️ Aggiungi ai Preferiti';
+            btn.disabled = false;
+        }
     }
 }
 
+// Global app instance
+let app;
+
 // Inizializza l'app quando la pagina è caricata
 document.addEventListener('DOMContentLoaded', () => {
-    new StreamingApp();
+    app = new StreamingApp();
 });
 
 // CSS aggiuntivo per messaggi di errore
