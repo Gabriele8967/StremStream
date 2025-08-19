@@ -1,0 +1,167 @@
+VixSrc
+Documentation
+
+Test Player
+VixSrc
+Next generation Streaming API
+
+Get Started >
+or
+Test the Player
+8K+
+Movies
+3K+
+Shows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Movie Player
+
+Series Player
+TMDB
+https://vixsrc.to/movie/786892/
+
+Easy to use
+
+Intuitive and easy to use. Just copy the link and embed it into your website
+
+Huge Library
+
+With movies and shows scraped from multiple websites, we have it all!
+
+Customizable
+
+You can customize the player to your needs, using only query parameters
+
+Auto Update
+
+Content added every day, updated automatically
+
+Highest Quality
+
+Latest available quality and the fastest
+
+Api Documentation
+Embed Movies
+
+TmdbId is required from The Movie Database API.
+https://vixsrc.to/movie/{tmdbId}
+Embed Shows
+
+TmdbId is required from The Movie DatabaseAPI. season and episode number should not be empty.
+https://vixsrc.to/tv/{tmdbId}/{season}/{episode}
+List catalog
+
+Type is required and can be: {"movie", "tv", "episode"}, lang param is optional
+https://vixsrc.to/api/list/{type}?lang=it
+Customization Parameters
+You can customize the embedded media player by appending parameters to the URL. Each parameter should start with a ? and multiple parameters should be separated by &.
+Use Hex Color Codesand remove the '#' before applying.
+primaryColor
+Sets the primary color of the player, including sliders and autoplay controls.
+
+primaryColor=B20710
+secondaryColor
+Defines the color of the progress bar behind the sliders.
+
+secondaryColor=170000
+autoplay
+Controls whether the media starts playing automatically.
+
+autoplay=false
+startAt
+Starts the video at the specified time in seconds.
+
+startAt=60
+lang
+Sets preferred language for the audio track.
+
+lang=it
+Player Events
+Player Event Tracking
+Listen to player events to track user interactions and video playback states. Events are sent via postMessage to the parent window.
+
+Available Events
+play
+Triggered when video starts playing
+pause
+Triggered when video is paused
+seeked
+Triggered when user seeks to a different timestamp
+ended
+Triggered when video playback ends
+timeupdate
+Triggered periodically during playback
+Event Data Structure
+Event Object
+
+Copy
+{
+  type: "PLAYER_EVENT",
+  data: {
+    event: "play" | "pause" | "seeked" | "ended" | "timeupdate",
+    currentTime: number,
+    duration: number,
+    video_id: number
+  }
+}
+Custom domains
+New
+Custom embed domain
+Use your own domain for the embed API, helping bypass ISP blocks and avoid detection
+
+Step 1: Add your domain
+example.com
+Submit domain
+Custom CDN
+Coming soon
+Custom CDN
+ISPs block our CDN? No problem! You can use your own CDN to proxy our content
+
+© 2025 VixSrc. All rights reserved - StreamingCommunity
