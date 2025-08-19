@@ -270,7 +270,8 @@ class StreamingApp {
         this.updateWatchlistButton();
         
         const playerFrame = document.getElementById('playerFrame');
-        playerFrame.src = `https://vixsrc.to/movie/${tmdbId}?lang=it&autoplay=true&primaryColor=4ecdc4&secondaryColor=ff6b6b`;
+        // Aggiungi parametri per ridurre annunci
+        playerFrame.src = `https://vixsrc.to/movie/${tmdbId}?lang=it&autoplay=true&primaryColor=4ecdc4&secondaryColor=ff6b6b&ads=0&popups=0`;
         
         this.showPlayer();
     }
@@ -415,7 +416,8 @@ class StreamingApp {
         const episode = document.getElementById('episodeSelect').value;
         
         const playerFrame = document.getElementById('playerFrame');
-        playerFrame.src = `https://vixsrc.to/tv/${this.currentShow.tmdbId}/${season}/${episode}?lang=it&autoplay=true&primaryColor=4ecdc4&secondaryColor=ff6b6b`;
+        // Aggiungi parametri per ridurre annunci
+        playerFrame.src = `https://vixsrc.to/tv/${this.currentShow.tmdbId}/${season}/${episode}?lang=it&autoplay=true&primaryColor=4ecdc4&secondaryColor=ff6b6b&ads=0&popups=0`;
         
         // Add to history when episode changes
         if (this.currentContent) {
@@ -426,6 +428,15 @@ class StreamingApp {
     showPlayer() {
         document.getElementById('playerModal').classList.add('active');
         document.body.style.overflow = 'hidden';
+        
+        // Migliora l'esperienza rimuovendo l'overlay informatico dopo 5 secondi
+        setTimeout(() => {
+            const overlay = document.querySelector('.player-overlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 1000);
+            }
+        }, 5000);
     }
 
     closePlayer() {
