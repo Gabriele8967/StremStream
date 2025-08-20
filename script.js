@@ -12,11 +12,17 @@ class StreamingApp {
         this.bookmarks = this.loadFromStorage('bookmarks') || [];
         this.notes = this.loadFromStorage('notes') || {};
         
+        // Legal consent tracking
+        this.legalConsent = this.loadFromStorage('legalConsent');
+        this.consentTimestamp = this.loadFromStorage('consentTimestamp');
+        
         this.init();
     }
 
     init() {
         this.setupEventListeners();
+        this.setupLegalModal();
+        this.checkLegalConsent();
         this.loadContent('movies');
     }
 
@@ -811,10 +817,153 @@ class StreamingApp {
             btn.disabled = false;
         }
     }
+
+    // Legal Disclaimer Modal Functions
+    setupLegalModal() {
+        const consentCheckbox = document.getElementById('legalConsent');
+        const acceptBtn = document.getElementById('acceptLegal');
+        const declineBtn = document.getElementById('declineLegal');
+
+        // Enable/disable accept button based on checkbox
+        consentCheckbox.addEventListener('change', () => {
+            acceptBtn.disabled = !consentCheckbox.checked;
+        });
+
+        // Handle accept button
+        acceptBtn.addEventListener('click', () => {
+            this.acceptLegalTerms();
+        });
+
+        // Handle decline button
+        declineBtn.addEventListener('click', () => {
+            this.declineLegalTerms();
+        });
+    }
+
+    checkLegalConsent() {
+        const consentDate = this.consentTimestamp;
+        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+        
+        // Show modal if no consent or consent is older than 30 days
+        if (!this.legalConsent || !consentDate || consentDate < thirtyDaysAgo) {
+            this.showLegalModal();
+        }
+    }
+
+    showLegalModal() {
+        const modal = document.getElementById('legalDisclaimerModal');
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Reset form
+        document.getElementById('legalConsent').checked = false;
+        document.getElementById('acceptLegal').disabled = true;
+    }
+
+    hideLegalModal() {
+        const modal = document.getElementById('legalDisclaimerModal');
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+
+    acceptLegalTerms() {
+        // Save consent with timestamp
+        this.legalConsent = true;
+        this.consentTimestamp = Date.now();
+        this.saveToStorage('legalConsent', true);
+        this.saveToStorage('consentTimestamp', this.consentTimestamp);
+        
+        // Hide modal
+        this.hideLegalModal();
+        
+        // Show success message
+        this.showMessage('Termini accettati. Buona navigazione!', 'success');
+        
+        // Log consent event for compliance
+        this.logConsentEvent('accepted');
+    }
+
+    declineLegalTerms() {
+        // Log decline event
+        this.logConsentEvent('declined');
+        
+        // Show decline message
+        alert('Non puoi utilizzare questo sito senza accettare i termini legali. Verrai reindirizzato a un servizio di streaming legale.');
+        
+        // Redirect to legal streaming service
+        window.location.href = 'https://www.netflix.com';
+    }
+
+    logConsentEvent(action) {
+        // Log consent events for legal compliance (GDPR/VPPA requirements)
+        const consentLog = {
+            action: action,
+            timestamp: Date.now(),
+            userAgent: navigator.userAgent,
+            ip: 'client-side', // Would need server-side implementation for real IP
+            consentType: 'legal_disclaimer'
+        };
+        
+        // Store in localStorage for demonstration (in production, send to server)
+        let logs = this.loadFromStorage('consentLogs') || [];
+        logs.unshift(consentLog);
+        
+        // Keep only last 100 logs
+        if (logs.length > 100) {
+            logs = logs.slice(0, 100);
+        }
+        
+        this.saveToStorage('consentLogs', logs);
+        console.log('Consent event logged:', consentLog);
+    }
+
+    // Function called from footer links
+    showLegalInfo() {
+        this.showLegalModal();
+    }
 }
 
 // Global app instance
 let app;
+
+// Global functions for footer links
+function showLegalModal() {
+    if (app) {
+        app.showLegalModal();
+    }
+}
+
+function showPrivacyInfo() {
+    alert(`🔒 INFORMAZIONI PRIVACY
+
+Questo sito utilizza solo localStorage per salvare le tue preferenze localmente.
+Non raccogliamo dati personali, non usiamo cookie di tracciamento.
+
+I dati vengono memorizzati solo nel tuo browser:
+- Preferiti e cronologia
+- Consenso ai termini legali
+- Note personali sui contenuti
+
+Per eliminare tutti i dati: svuota la cache del browser.
+
+Le API di terze parti (VixSrc, TMDB) hanno le loro politiche privacy.`);
+}
+
+function showDisclaimerInfo() {
+    alert(`⚖️ DISCLAIMER COMPLETO
+
+SCOPO: Solo educativo/dimostrativo
+CONTENUTI: Non ospitati da noi, forniti da API esterne
+RESPONSABILITÀ: Dell'utente per l'uso conforme alle leggi
+COMMERCIALE: No, progetto senza scopi di lucro
+
+RACCOMANDAZIONI:
+- Netflix, Amazon Prime Video, Disney+
+- Altri servizi di streaming legali
+
+Non supportiamo attività illegali.
+Rispettare sempre le leggi sul copyright.`);
+}
 
 // Inizializza l'app quando la pagina è caricata
 document.addEventListener('DOMContentLoaded', () => {

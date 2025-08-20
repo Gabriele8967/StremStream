@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StreamingCommunity</title>
-    <link rel="stylesheet" href="style.css?v=2.0">
+    <meta name="description" content="Progetto educativo dimostrativo per lo sviluppo web - Solo scopi didattici">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="classification" content="Educational">
+    <title>StreamingCommunity - Educational Project</title>
+    <link rel="stylesheet" href="style.css?v=3.0">
 </head>
 <body>
     <header>
@@ -41,6 +44,71 @@
                     <strong>Nota:</strong> Non tutti i contenuti TMDB potrebbero essere disponibili su VixSrc. Se un contenuto non si carica, prova con un altro titolo.
                 </span>
                 <button class="close-notice" onclick="this.parentElement.parentElement.style.display='none'">&times;</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legal Disclaimer Modal -->
+    <div id="legalDisclaimerModal" class="legal-modal">
+        <div class="legal-modal-content">
+            <div class="legal-modal-header">
+                <h2>⚖️ AVVISO LEGALE IMPORTANTE</h2>
+                <p class="legal-subtitle">Leggere attentamente prima di procedere</p>
+            </div>
+            
+            <div class="legal-modal-body">
+                <div class="legal-section">
+                    <h3>🎓 Scopo Educativo</h3>
+                    <p>Questo sito è sviluppato <strong>esclusivamente per scopi educativi e dimostrativi</strong>. Non ha finalità commerciali.</p>
+                </div>
+                
+                <div class="legal-section">
+                    <h3>❌ Limitazioni d'Uso</h3>
+                    <ul>
+                        <li>NON è un servizio di streaming commerciale</li>
+                        <li>NON ospita contenuti protetti da copyright</li>
+                        <li>NON sostituisce servizi legali come Netflix, Prime Video</li>
+                        <li>NON è destinato all'uso commerciale</li>
+                    </ul>
+                </div>
+                
+                <div class="legal-section">
+                    <h3>👤 Responsabilità dell'Utente</h3>
+                    <p>Utilizzando questo sito, dichiari di:</p>
+                    <ul>
+                        <li>Rispettare le leggi sul copyright del tuo paese</li>
+                        <li>Utilizzare il sito solo per scopi educativi/dimostrativi</li>
+                        <li>Essere consapevole che utilizziamo API di terze parti</li>
+                        <li>Avere almeno 18 anni o consenso parentale</li>
+                    </ul>
+                </div>
+                
+                <div class="legal-section">
+                    <h3>🌐 API di Terze Parti</h3>
+                    <p>Il sito utilizza API esterne (VixSrc, TMDB). Non controlliamo i contenuti forniti da queste API.</p>
+                </div>
+                
+                <div class="legal-warning">
+                    <h3>⚠️ RACCOMANDAZIONE</h3>
+                    <p>Per guardare contenuti, utilizza servizi legali: <strong>Netflix, Amazon Prime Video, Disney+, Apple TV+</strong> e altre piattaforme autorizzate.</p>
+                </div>
+            </div>
+            
+            <div class="legal-modal-footer">
+                <div class="consent-options">
+                    <label class="consent-checkbox">
+                        <input type="checkbox" id="legalConsent" required>
+                        <span class="checkmark"></span>
+                        Ho letto e accetto i termini sopra indicati
+                    </label>
+                </div>
+                <div class="legal-buttons">
+                    <button id="declineLegal" class="legal-btn decline">❌ Rifiuta e Esci</button>
+                    <button id="acceptLegal" class="legal-btn accept" disabled>✅ Accetta e Continua</button>
+                </div>
+                <p class="legal-footer-text">
+                    Continuando, accetti di utilizzare questo sito solo per scopi educativi e di rispettare tutte le leggi applicabili.
+                </p>
             </div>
         </div>
     </div>
@@ -148,10 +216,26 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2025 StreamingCommunity - Powered by VixSrc API</p>
+            <div class="footer-content">
+                <div class="footer-main">
+                    <p>&copy; 2025 StreamingCommunity - Solo Uso Educativo</p>
+                    <p>Powered by VixSrc API & TMDB</p>
+                </div>
+                <div class="footer-legal">
+                    <a href="#" onclick="showLegalModal()">📄 Termini di Servizio</a>
+                    <span class="separator">•</span>
+                    <a href="#" onclick="showPrivacyInfo()">🔒 Privacy</a>
+                    <span class="separator">•</span>
+                    <a href="#" onclick="showDisclaimerInfo()">⚖️ Disclaimer</a>
+                </div>
+                <div class="footer-warning">
+                    <small>⚠️ Questo sito è sviluppato solo per scopi educativi. Non supportiamo attività illegali. 
+                    Per guardare contenuti, utilizza servizi legali come Netflix, Amazon Prime Video, ecc.</small>
+                </div>
+            </div>
         </div>
     </footer>
 
-    <script src="script.js?v=2.0"></script>
+    <script src="script.js?v=3.0"></script>
 </body>
 </html>
