@@ -75,6 +75,50 @@ Il player supporta diversi parametri di personalizzazione:
 4. Push al branch
 5. Apri una Pull Request
 
+## ⚖️ DISCLAIMER LEGALE
+
+**IMPORTANTE: LEGGERE ATTENTAMENTE PRIMA DELL'USO**
+
+### Scopo del Progetto
+Questo progetto è stato sviluppato esclusivamente per:
+- **Uso educativo e didattico**: Studio di API, sviluppo web e tecnologie frontend
+- **Sperimentazione tecnica personale**: Test di integrazione API e sviluppo di interfacce utente
+- **Portfolio personale**: Dimostrazione di competenze di sviluppo software
+
+### Limitazioni d'Uso
+- ❌ **NON è destinato all'uso commerciale** o al profitto economico
+- ❌ **NON fornisce o ospita contenuti protetti da copyright**
+- ❌ **NON è un servizio di streaming commerciale**
+- ❌ **NON sostituisce servizi di streaming legali**
+
+### Responsabilità dell'Utente
+L'utente che utilizza questo codice si assume la piena responsabilità di:
+- Rispettare le leggi locali e internazionali sul copyright
+- Utilizzare il progetto solo per scopi educativi/sperimentali
+- Non utilizzarlo per attività commerciali o illegali
+- Verificare la legittimità dei contenuti accessibili tramite API di terze parti
+
+### API di Terze Parti
+Il progetto utilizza API esterne (VixSrc, TMDB) per scopi dimostrativi:
+- Non controlliamo né siamo responsabili per i contenuti forniti da queste API
+- L'uso delle API è soggetto ai loro termini di servizio
+- Consigliamo di utilizzare solo servizi di streaming legali e autorizzati
+
+### Raccomandazioni
+Per il consumo di contenuti multimediali, consigliamo vivamente di utilizzare:
+- Netflix, Amazon Prime Video, Disney+, Apple TV+
+- Servizi di streaming legali nel vostro paese
+- Piattaforme autorizzate dai detentori dei diritti
+
+### Esonero di Responsabilità
+Gli sviluppatori di questo progetto:
+- Non sono responsabili per l'uso improprio del codice
+- Non supportano la pirateria o violazioni del copyright
+- Forniscono il codice "as-is" solo per scopi educativi
+- Consigliano il rispetto delle leggi sulla proprietà intellettuale
+
+---
+
 ## 📄 Licenza
 
-Questo progetto è solo per uso educativo e personale.
+Questo progetto è rilasciato sotto licenza MIT esclusivamente per uso educativo e personale. L'uso commerciale è espressamente vietato.
