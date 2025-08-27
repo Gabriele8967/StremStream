@@ -275,11 +275,12 @@ class StreamingApp {
         // Update watchlist button
         this.updateWatchlistButton();
         
-        const playerFrame = document.getElementById('playerFrame');
-        // URL semplificato secondo documentazione VixSrc aggiornata
-        playerFrame.src = `https://vixsrc.to/movie/${tmdbId}?lang=it&autoplay=false&primaryColor=4ecdc4&secondaryColor=ff6b6b`;
+        // Open in new tab instead of iframe due to X-Frame-Options
+        const vixsrcUrl = `https://vixsrc.to/movie/${tmdbId}?lang=it&autoplay=false&primaryColor=4ecdc4&secondaryColor=ff6b6b`;
+        window.open(vixsrcUrl, '_blank');
         
-        this.showPlayer();
+        // Show message instead of player
+        this.showMessage('Player aperto in una nuova scheda', 'info');
     }
 
     async playTVShow(show) {
@@ -421,9 +422,12 @@ class StreamingApp {
         const season = document.getElementById('seasonSelect').value;
         const episode = document.getElementById('episodeSelect').value;
         
-        const playerFrame = document.getElementById('playerFrame');
-        // URL semplificato secondo documentazione VixSrc aggiornata
-        playerFrame.src = `https://vixsrc.to/tv/${this.currentShow.tmdbId}/${season}/${episode}?lang=it&autoplay=false&primaryColor=4ecdc4&secondaryColor=ff6b6b`;
+        // Open in new tab instead of iframe due to X-Frame-Options
+        const vixsrcUrl = `https://vixsrc.to/tv/${this.currentShow.tmdbId}/${season}/${episode}?lang=it&autoplay=false&primaryColor=4ecdc4&secondaryColor=ff6b6b`;
+        window.open(vixsrcUrl, '_blank');
+        
+        // Show message instead of loading in iframe
+        this.showMessage('Episodio aperto in una nuova scheda', 'info');
         
         // Add to history when episode changes
         if (this.currentContent) {
