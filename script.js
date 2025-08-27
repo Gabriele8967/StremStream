@@ -276,8 +276,8 @@ class StreamingApp {
         this.updateWatchlistButton();
         
         const playerFrame = document.getElementById('playerFrame');
-        // Aggiungi parametri per ridurre annunci
-        playerFrame.src = `https://vixsrc.to/movie/${tmdbId}?lang=it&autoplay=true&primaryColor=4ecdc4&secondaryColor=ff6b6b&ads=0&popups=0`;
+        // URL semplificato secondo documentazione VixSrc aggiornata
+        playerFrame.src = `https://vixsrc.to/movie/${tmdbId}?lang=it&autoplay=false&primaryColor=4ecdc4&secondaryColor=ff6b6b`;
         
         this.showPlayer();
     }
@@ -422,8 +422,8 @@ class StreamingApp {
         const episode = document.getElementById('episodeSelect').value;
         
         const playerFrame = document.getElementById('playerFrame');
-        // Aggiungi parametri per ridurre annunci
-        playerFrame.src = `https://vixsrc.to/tv/${this.currentShow.tmdbId}/${season}/${episode}?lang=it&autoplay=true&primaryColor=4ecdc4&secondaryColor=ff6b6b&ads=0&popups=0`;
+        // URL semplificato secondo documentazione VixSrc aggiornata
+        playerFrame.src = `https://vixsrc.to/tv/${this.currentShow.tmdbId}/${season}/${episode}?lang=it&autoplay=false&primaryColor=4ecdc4&secondaryColor=ff6b6b`;
         
         // Add to history when episode changes
         if (this.currentContent) {
